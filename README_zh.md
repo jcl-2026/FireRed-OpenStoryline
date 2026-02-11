@@ -96,8 +96,27 @@
 
 
 ## 📦 安装
+### 快速自动安装
+#### For MacOS and Linux
+```
+# 安装 brew 
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-### 1. 克隆仓库
+# 安装 wget
+brew install wget
+
+# MacOS 和 Linux 快速安装
+wget -c https://github.com/FireRedTeam/FireRed-OpenStoryline/archive/refs/heads/main.zip && \
+unzip main.zip && \
+cd FireRed-OpenStoryline-main && \
+sh build_env.sh
+
+# 启动 Web 服务，体验 OpenStoryline
+conda activate storyline && sh run.sh
+```
+
+### 手动安装
+#### 1. 克隆仓库
 ```bash
 # 如果没有安装git，参考官方网站进行安装：https://git-scm.com/install/
 # 或手动打包下载，并解压
@@ -105,7 +124,7 @@ git clone https://github.com/FireRedTeam/FireRed-OpenStoryline.git
 cd FireRed-OpenStoryline
 ```
 
-### 2. 创建虚拟环境
+#### 2. 创建虚拟环境
 
 按照官方指南安装 Conda（推荐Miniforge，安装过程中建议勾选上自动配置环境变量）：https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
@@ -115,14 +134,14 @@ conda create -n storyline python=3.11
 conda activate storyline
 ```
 
-### 3. 资源下载与依赖安装
-#### 3.1 一键安装（仅支持Linux和MacOS）
+#### 3. 资源下载与依赖安装
+##### 3.1 一键安装（仅支持Linux和MacOS）
 ```
 sh build_env.sh
 ```
 
-#### 3.2 手动安装
-##### A. MacOS 或 Linux
+##### 3.2 手动安装
+###### A. MacOS 或 Linux
   - Step 1: 安装 wget（如果尚未安装）
     
     ```

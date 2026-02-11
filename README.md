@@ -91,14 +91,30 @@
 
 
 ## 📦 Install
-### 1. Clone repository
+### Quick Install (Recommended)
+#### For MacOS and Linux
+```
+# install brew 
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# install wget
+brew install wget
+
+# Quick install for MacOS and Linux
+wget -c https://github.com/FireRedTeam/FireRed-OpenStoryline/archive/refs/heads/main.zip && unzip main.zip && cd FireRed-OpenStoryline-main && sh build_env.sh
+
+# Then start web service and enjoy openstoryline
+conda activate storyline && sh run.sh
+```
+
+#### 1. Clone repository
 ```
 # If git is not installed, refer to the official website for installation: https://git-scm.com/install/
 # Or manually download the code
 git clone https://github.com/FireRedTeam/FireRed-OpenStoryline.git
 cd FireRed-OpenStoryline
 ```
-### 2. Create a virtual environment
+#### 2. Create a virtual environment
 
 Install Conda according to the official guide (Miniforge is recommended, it is suggested to check the option to automatically configure environment variables during installation): https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
@@ -108,13 +124,13 @@ Install Conda according to the official guide (Miniforge is recommended, it is s
 conda create -n storyline python=3.11
 conda activate storyline
 ```
-### 3. 📦 Resource Download & Installation
-#### 3.1 Automatic Installation (Linux and macOS only)
+#### 3. 📦 Resource Download & Installation
+##### 3.1 Automatic Installation (Linux and macOS only)
 ```
 sh build_env.sh
 ```
-#### 3.2 Manual Installation
-##### A. MacOS or Linux
+##### 3.2 Manual Installation
+###### A. MacOS or Linux
   - Step 1: Install wget (if not already installed)
 
     ```
@@ -139,7 +155,7 @@ sh build_env.sh
     pip install -r requirements.txt
     ```
 
-##### B. Windows
+###### B. Windows
 
   - Step 1: Prepare Directory: Create a new directory named `.storyline` in the project root directory.
 

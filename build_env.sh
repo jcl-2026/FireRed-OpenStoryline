@@ -61,10 +61,93 @@ echo "[1/4] 检查 conda 环境... | Checking conda environment..."
 if [ -z "$CONDA_DEFAULT_ENV" ]; then
     print_error "未检测到 conda 环境 | No conda environment detected"
     echo ""
-    echo "请先运行: conda activate storyline"
-    echo "Please run: conda activate storyline"
-    exit 1
+    
+    # 检查是否已安装 Miniconda
+    if [ -d "$HOME/miniconda3" ]; then
+        echo "检测到已安装的 Miniconda | Miniconda already installed"
+        source "$HOME/miniconda3/etc/profile.d/conda.sh"
+    else
+        echo "正在自动安装 Miniconda... | Auto-installing Miniconda..."
+        
+        # 检测操作系统
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            # 检测 Mac 芯片架构
+            if [[ $(uname -m) == "arm64" ]]; then
+                MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh"
+            else
+                MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
+            fi
+        else
+            print_error "不支持的操作系统 | Unsupported OS"
+            exit 1
+        fi
+        
+        # 下载 Miniconda（支持断点续传）
+        MINICONDA_INSTALLER="/tmp/miniconda.sh"
+        echo "下载 Miniconda... | Downloading Miniconda..."
+        curl -C - -L -o "$MINICONDA_INSTALLER" "$MINICONDA_URL"
+        
+        if [ $? -ne 0 ]; then
+            print_error "下载 Miniconda 失败 | Failed to download Miniconda"
+            echo "安装包保留在: $MINICONDA_INSTALLER，可重新运行脚本继续 | Installer kept at: $MINICONDA_INSTALLER"
+            exit 1
+        fi
+        
+        # 验证下载完整性
+        if [ ! -s "$MINICONDA_INSTALLER" ]; then
+            print_error "下载的文件为空 | Downloaded file is empty"
+            rm -f "$MINICONDA_INSTALLER"
+            exit 1
+        fi
+        
+        echo "安装 Miniconda... | Installing Miniconda..."
+        bash "$MINICONDA_INSTALLER" -b -p "$HOME/miniconda3"
+        
+        if [ $? -ne 0 ]; then
+            print_error "安装 Miniconda 失败 | Failed to install Miniconda"
+            echo "安装包保留在: $MINICONDA_INSTALLER | Installer kept at: $MINICONDA_INSTALLER"
+            exit 1
+        fi
+        
+        # 初始化 conda
+        source "$HOME/miniconda3/etc/profile.d/conda.sh"
+        conda init bash
+        
+        echo "Miniconda 安装完成 | Miniconda installed successfully"
+    fi
+    
+    # 检查 storyline 环境是否存在
+    if conda env list | grep -q "^storyline "; then
+        echo "检测到 storyline 环境，激活中... | Storyline environment detected, activating..."
+        conda activate storyline
+    else
+        echo "正在创建 storyline 环境... | Creating storyline environment..."
+        
+        # 创建并激活环境
+        conda create -n storyline python=3.11 -y
+        
+        if [ $? -ne 0 ]; then
+            print_error "创建环境失败 | Failed to create environment"
+            echo "请检查网络连接后重新运行 | Please check network and retry"
+            exit 1
+        fi
+        
+        conda activate storyline
+        echo "环境创建完成 | Environment created successfully"
+    fi
+    
+    # 所有步骤成功后才删除安装包
+    if [ -f "$MINICONDA_INSTALLER" ]; then
+        echo "清理安装包... | Cleaning up installer..."
+        rm -f "$MINICONDA_INSTALLER"
+    fi
+    
+else
+    echo "检测到 conda 环境: $CONDA_DEFAULT_ENV | Conda environment detected: $CONDA_DEFAULT_ENV"
 fi
+
 
 if [ "$CONDA_DEFAULT_ENV" != "storyline" ]; then
     print_warning "当前环境: $CONDA_DEFAULT_ENV"
@@ -95,41 +178,33 @@ if ! command -v ffmpeg &> /dev/null; then
     print_warning "未检测到 FFmpeg | FFmpeg not detected"
     echo ""
     
-    read -p "是否安装 FFmpeg? | Install FFmpeg? (y/n) " -n 1 -r
-    echo ""
+    print_info "正在安装 FFmpeg... | Installing FFmpeg..."
     
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        print_info "正在安装 FFmpeg... | Installing FFmpeg..."
-        
-        if [ "$IS_MACOS" = true ]; then
-            if ! command -v brew &> /dev/null; then
-                print_error "需要 Homebrew 来安装 FFmpeg | Homebrew required to install FFmpeg"
-                echo "请访问: https://brew.sh"
-                exit 1
-            fi
-            brew install ffmpeg
-        elif [ "$IS_LINUX" = true ]; then
-            if command -v apt-get &> /dev/null; then
-                sudo apt-get update
-                sudo apt-get install -y ffmpeg
-            elif command -v yum &> /dev/null; then
-                sudo yum install -y epel-release
-                sudo yum install -y ffmpeg ffmpeg-devel
-            else
-                print_error "无法识别的包管理器 | Unrecognized package manager"
-                exit 1
-            fi
-        fi
-        
-        if [ $? -eq 0 ]; then
-            print_success "FFmpeg 安装成功 | FFmpeg installed successfully"
-        else
-            print_error "FFmpeg 安装失败 | FFmpeg installation failed"
+    if [ "$IS_MACOS" = true ]; then
+        if ! command -v brew &> /dev/null; then
+            print_error "需要 Homebrew 来安装 FFmpeg | Homebrew required to install FFmpeg"
+            echo "请访问: https://brew.sh"
             exit 1
         fi
+        brew install ffmpeg
+    elif [ "$IS_LINUX" = true ]; then
+        if command -v apt-get &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+        elif command -v yum &> /dev/null; then
+            sudo yum install -y epel-release
+            sudo yum install -y ffmpeg ffmpeg-devel
+        else
+            print_error "无法识别的包管理器 | Unrecognized package manager"
+            exit 1
+        fi
+    fi
+    
+    if [ $? -eq 0 ]; then
+        print_success "FFmpeg 安装成功 | FFmpeg installed successfully"
     else
-        print_warning "跳过 FFmpeg 安装（可能影响音视频处理功能）"
-        print_warning "Skipping FFmpeg (may affect audio/video features)"
+        print_error "FFmpeg 安装失败 | FFmpeg installation failed"
+        exit 1
     fi
 else
     print_success "FFmpeg 已安装 | FFmpeg installed"
