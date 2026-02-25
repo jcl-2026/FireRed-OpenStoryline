@@ -163,7 +163,7 @@ Note: Before starting, you need to configure the API-Key in config.toml first. F
 #### MacOS or Linux
 
 ```bash
-PYTHONPATH=src python3 -m open_storyline.mcp.server
+PYTHONPATH=src python -m open_storyline.mcp.server
 ```
 
 #### Windows

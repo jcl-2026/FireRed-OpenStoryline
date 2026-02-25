@@ -7,7 +7,7 @@ export PYTHONPATH="$ROOT_DIR/src"
 HOST="${HOST:-0.0.0.0}"
 PORT="${PORT:-7860}"
 
-python3 -m open_storyline.mcp.server &
+python -m open_storyline.mcp.server &
 MCP_PID=$!
 
 uvicorn agent_fastapi:app \
